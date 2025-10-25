@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Rose",
+  "version": "1.0.0",
+  "description": "Nâng cao trải nghiệm 'học tập' trên Azota",
+  "key": "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCaBP29frCGbS/Rn3MPytsD2TXZ52YQktLdpY95VUdsSCdFlSxavq1wxdNSfrb03Hkk3X7qXMWJfVDIRidi9UZmjiVkiXQsCiPrN0BE1h1hruzQYrTcnPpof/NbnCaGZlLuM6rdPWW0IAMGUnfVcG7piNagGh4JQZZrlOCdr3vvqNm/Qnt0R0xvHqJUtCV8FvvxU9vUlNWRfjew79FNu9ATeHKXph8ndGXVJfkFmh3UVFg4uzHkTqCxLesQXeeDXsvo/NCL/3ONRZXe222T9IsG7fh3M/vSs71xPV1tPV+fqJH/wH9c3+mjExcAH+Po4QWTopwbzNBgB2isKAeMv0LfAgMBAAECggEAMWEjRuM8zkRoXeEsnyYO9Ntpb/zH1M117Jj9eE2WkglKCf2LFGborWzHVT4KA1RCRMb8vz/SF0QFp8gSLaBsm0m8hFCrXck8fdefc9Jf5icShrb2vHpZsDJBgB/+m/1nXjZTdA4QsuDGh3reL6CV9qqoAPmOorIT+1bmcrfF2O5+2fcJgBYYFIX91OA00+gmqyKSRrC3kwb4AmCI04Pr67q0qSUMbBXA6cmim9ChxjudVxnEfE0L+t3PtB87qwvS4FfzY7L8Z2vFRqSSvHv6bQdK3Bkuk6KFsuYL4lu7d/mXOCKwyUEw9mvJ94qTzfAG7xmGs2yjXDf/uSrZUK/XDQKBgQDHCvZB7VobBRClrAb1naW11PqL/iQvvEyLMA1xwQutNzoVFCNZ5aF0vRa6QialSvbisKvFiihiPgMu2vmEmebFAIYaXVpW9xO8zvS0VosRFVp27PMGaio4KkpLb7cqmA+KELbEnI08GmHe9tes0/u5IiIW0/ZmkK//fEFQAhVyYwKBgQDGF89x2F42zE9fg4iiEopqCxsaOclvHMLcmEVCt0qx0TD9IrOs7jdyLL8/YR5lduhwWcp66sPAs67GvHZqNOk71qvfcmmthTCp5lBNxy2CPaGEzPD4RhYWUfkMkEhoKy4K6oApwjGF6S3ICFl4JJi5lyaFc6iXuGH+RCAfBK0YVQKBgQCOyh9lpkeY0KZjo6iOdVzWuAZRfa0qDZR/2aYbcBjXV6I0UvEVYbXVEH2Ie0JMHB5G++UOXpGgAMq5x19vMBUsSLbrnQLdFn0zWuiTou47AC2Y2V1ywaCuEDCiM2+cf9/N9TWYkJKFhoulr0GD+8M+yezYoZDHfY604sfcBNKr7wKBgATHXETF0HgH8749IRWv1tD6FZxLWpWonvbNYZZbb5zcjA7/QFBiqsnBVJfF0wLlnHPhZqYSdch3TTcUItMrFZlQ83J/gxchiGwA110Y+fsTW4slmoaSwkOllJl9/ZEtwX2X7KGVQraVSnpx4R6p21lW0SIVCTMnyo1kvVWiOj7FAoGATUQ9NyOpMtqDjI5DcCbvr8tkjFjfkf7zMdPaqJn8wa8k7sZtD9ISOgP9avgxpyl7WKVWIh98wyRfPFUpD7K/V4Ld2wPIYjXr8stvK4djEQVygUyHgVEMztFbktBcPIeoLQqjq3kyVkNt9UmGgkZJW/uP9c5lknjaF2ol3I4Z0Ao=",
+  "icons": {
+    "16": "images/icon-16.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "incognito": "split",
+  "permissions": ["scripting", "tabs"],
+  "content_scripts": [
+    {
+      "matches": ["https://azota.vn/*"],
+      "js": ["assets/content.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "assets/background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/download.js", "assets/unlimited.js"],
+      "matches": ["https://azota.vn/*"]
+    }
+  ],
+  "host_permissions": ["https://azota.vn/*"]
+}
