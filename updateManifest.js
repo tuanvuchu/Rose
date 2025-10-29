@@ -10,16 +10,6 @@ files.forEach((p) => {
   }
 });
 
-if (Array.isArray(manifest.content_scripts)) {
-  manifest.content_scripts.forEach((script) => {
-    script.js = script.js.map((jsFile) => {
-      const baseName = jsFile.replace("assets/", "").replace(".js", "");
-      const matchedFile = files.find((file) => file.startsWith(`${baseName}-`));
-      return matchedFile ? `assets/${matchedFile}` : jsFile;
-    });
-  });
-}
-
 if (Array.isArray(manifest.web_accessible_resources)) {
   manifest.web_accessible_resources.forEach((script) => {
     script.resources = script.resources.map((jsFile) => {

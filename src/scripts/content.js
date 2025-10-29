@@ -1,78 +1,101 @@
-function main() {
-  const vipButton = document.querySelector("a.btn.btn-sm.btn-gradient-primary");
-  if (vipButton?.parentElement) {
-    vipButton.parentElement.remove();
-  }
+if (!window.contentScript) {
+  window.contentScript = true;
+  const targetAPIs = [
+    "api/VipPackage/GetMyPackage",
+    "api/PayAsGoPayment/GetCurrentPoint",
+    "api/v1/student-practice/can-attempt-exam",
+    "api/v1/support-tool/request-export-docx",
+    "api/v1/support-tool/check-using-resource",
+  ];
 
-  const div = document.querySelector("div.text-xs.text-slate-600");
-  if (div) {
-    const span = div.querySelector('span[style*="vertical-align"]');
-    if (span && !span.textContent.includes("VIP")) {
-      span.textContent = `${span.textContent} VIP`;
-    }
-  }
+  const handlers = [
+    {
+      key: "GetMyPackage",
+      apply: (json) => {
+        json.data.obj = {
+          ...json.data.obj,
+          vipPackage: { totalDevices: 5 },
+          vipSubscriptionObj: {
+            startTime: "2004-06-02T00:00:00",
+            endTime: "2004-08-02T00:00:00",
+          },
+          isVipTeacher: true,
+          isVipStudent: true,
+        };
+      },
+    },
+    {
+      key: "GetCurrentPoint",
+      apply: (json) => {
+        json.data = {
+          ...json.data,
+          totalPoint: 28,
+          canUseExportExcel50: true,
+          canUseExportExcel50ByTime: true,
+        };
+      },
+    },
+    {
+      key: "can-attempt-exam",
+      apply: (json) => {
+        json.value = true;
+      },
+    },
+    {
+      key: "request-export-docx",
+      apply: (json) => {
+        json.value = true;
+      },
+    },
+    {
+      key: "check-using-resource",
+      apply: (json) => {
+        json.currentPoint = 28;
+        json.canUsing = true;
+      },
+    },
+  ];
 
-  const template = `<p style="display: flex; gap: 5px">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"
-        class="lucide lucide-calendar-check">
-        <path d="M8 2v4" />
-        <path d="M16 2v4" />
-        <rect width="18" height="18" x="3" y="4" rx="2" />
-        <path d="M3 10h18" />
-        <path d="m9 16 2 2 4-4" />
-      </svg>
-      Ngày mua VIP: <span style="font-weight: bold">02/06/2004 00:00</span>
-    </p>
-    <p style="display: flex; gap: 5px">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"
-        class="lucide lucide-calendar-off">
-        <path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18" />
-        <path d="M21 15.5V6a2 2 0 0 0-2-2H9.5" />
-        <path d="M16 2v4" />
-        <path d="M3 10h7" />
-        <path d="M21 10h-5.5" />
-        <path d="m2 2 20 20" />
-      </svg>
-      Ngày hết hạn: <span style="font-weight: bold">02/08/2004 00:00 (62 ngày)</span>
-    </p>
-    <p style="display: flex; gap: 5px">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"
-        class="lucide lucide-monitor-smartphone">
-        <path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8" />
-        <path d="M10 19v-3.96 3.15" />
-        <path d="M7 19h5" />
-        <rect width="6" height="10" x="16" y="12" rx="2" />
-      </svg>
-      Số thiết bị: <span style="font-weight: bold">5</span>
-    </p>`;
+  const originalOpen = XMLHttpRequest.prototype.open;
+  const originalSend = XMLHttpRequest.prototype.send;
 
-  const vipSetting = document.querySelector("setting-azota-vip");
-  if (vipSetting) {
-    const note = vipSetting.querySelector(".note");
-    if (note) {
-      const noteParent = note.parentElement;
-      if (noteParent && !note.dataset.vipAdded) {
-        note.remove();
-        noteParent.style.display = "flex";
-        noteParent.style.flexDirection = "column";
-        noteParent.style.gap = "6px";
-        noteParent.innerHTML = template;
-        note.dataset.vipAdded = "true";
-        return true;
+  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    this._isTargetApi = targetAPIs.some((target) => url.includes(target));
+    this._currentUrl = url;
+    return originalOpen.call(this, method, url, ...rest);
+  };
+
+  XMLHttpRequest.prototype.send = function (...args) {
+    const originalOnReadyStateChange = this.onreadystatechange;
+
+    this.onreadystatechange = function (...cbArgs) {
+      if (this._isTargetApi && this.readyState === 4 && this.status === 200) {
+        try {
+          let json = JSON.parse(this.responseText);
+          handlers.forEach((p) => {
+            if (this._currentUrl.includes(p.key)) {
+              try {
+                p.apply(json);
+              } catch (error) {
+                console.error("Rose extension error:", p.key, error);
+              }
+            }
+          });
+
+          Object.defineProperty(this, "responseText", {
+            value: JSON.stringify(json),
+          });
+          Object.defineProperty(this, "response", { value: json });
+        } catch (error) {
+          console.error("Rose extension error:", error);
+        }
       }
-      return false;
-    }
-  }
+
+      if (originalOnReadyStateChange) {
+        return originalOnReadyStateChange.apply(this, cbArgs);
+      }
+    };
+
+    return originalSend.apply(this, args);
+  };
 }
-
-const observer = new MutationObserver(() => {
-  main();
-});
-
-observer.observe(document.body, { childList: true, subtree: true });

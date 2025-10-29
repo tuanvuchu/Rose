@@ -10,20 +10,13 @@
     "48": "images/icon-48.png",
     "128": "images/icon-128.png"
   },
-  "incognito": "split",
   "permissions": ["scripting", "tabs"],
-  "content_scripts": [
-    {
-      "matches": ["https://azota.vn/*"],
-      "js": ["assets/content.js"]
-    }
-  ],
   "background": {
     "service_worker": "assets/background.js"
   },
   "web_accessible_resources": [
     {
-      "resources": ["assets/download.js", "assets/unlimited.js"],
+      "resources": ["assets/content.js"],
       "matches": ["https://azota.vn/*"]
     }
   ],

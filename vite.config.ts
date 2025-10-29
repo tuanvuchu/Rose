@@ -9,8 +9,6 @@ export default defineConfig({
       input: {
         background: "src/background.js",
         content: "src/scripts/content.js",
-        download: "src/scripts/download.js",
-        unlimited: "src/scripts/unlimited.js",
       },
     },
   },
